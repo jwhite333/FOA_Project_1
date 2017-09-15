@@ -7,12 +7,24 @@
 #define MASTERMIND_CODE_SIZE 4
 #define MAX_CODE_VALUE 5
 
+
+/* codeElement
+* 
+* Stores an element in such a way that that the original index can be found if vectors are resized during checkIncorrect()
+*/
 struct codeElement
 {
 	int index;
 	int value;
 };
 
+/* findInSequence
+*
+* Finds the first instance of value in the given sequence
+*
+* @param sequence std::vector<codeElement> *
+* @param value int
+*/
 int findInSequence(std::vector<codeElement> * sequence, int value)
 {
 	for (auto iterator = sequence->begin(); iterator < sequence->end(); iterator++)
@@ -29,8 +41,8 @@ int findInSequence(std::vector<codeElement> * sequence, int value)
 class response
 {
 private:
-	int correct;
-	int incorrect; // Numbers in the wrong place
+	int correct;   // Numbers in the correct place
+	int incorrect; // Numbers that would be correct but are in the wrong place
 
 public:
 
