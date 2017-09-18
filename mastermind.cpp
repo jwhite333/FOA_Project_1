@@ -1,10 +1,20 @@
+// mastermind.cpp : Defines the entry point for the console application.
+//
+
+#include "stdafx.h"
+#include <iostream>
 #include "mastermind.h"
 #include <Windows.h>
 
+
 int main()
 {
+	mastermind newGame;
+	newGame.playGame();
+	system("pause");
+	return 0;
 	// Testing for comparison operations (Maybe this will be useful while creating the main program loop)
-	for (int i = 0; i < 10; i++)
+	/*for (int i = 0; i < 10; i++)
 	{
 		code newCode, guess;
 		newCode.initialize();
@@ -23,5 +33,6 @@ int main()
 		response.print();
 
 		system("pause");
-	}
+		return 0;
+	}*/
 }
