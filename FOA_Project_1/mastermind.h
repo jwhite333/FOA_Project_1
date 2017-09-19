@@ -1,11 +1,13 @@
 #pragma once
 #include <vector>
+#include <string>
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
 
 #define MASTERMIND_CODE_SIZE 4
 #define MAX_CODE_VALUE 5
+#define MAX_GUESSES 10
 
 
 /* codeElement
@@ -122,28 +124,58 @@ public:
 class code
 {
 private:
+	std::vector<int> sequence;
 	
 public:
-	std::vector<codeElement> sequence;
 	/* checkCorrect
 	*
-	* Compares the code sequence to the correct code and returs true if they are equivalient
+	* Compares the code sequence to the correct code and returs the number of numbers in the correct location
 	*
 	* @param correctCode std::vector<int>
 	*/
-	bool checkCorrect(code correctCode)
-	{
-		// Make sure no out of range errors occur
-		if ((int)sequence.size() != correctCode.sequence.size())
-			return false;
 
-		for (int index = 0; index < (int)sequence.size(); index++)
+	/* code
+	*
+	* Constructor to initialize a random code
+	*/
+	code()
+	{
+		initialize();
+	}
+
+	/* code
+	*
+	* Constructor to create a code object from a predefined vector
+	*
+	* @param newSequence std::vector<int>
+	*/
+	code(std::vector<int> newSequence)
+	{
+		// Manually create a new code sequence
+		try
 		{
-			if (sequence[index].value != correctCode.sequence[index].value)
-				return false;
+			if (newSequence.size() != MASTERMIND_CODE_SIZE)
+				throw "ERROR: Vector was of incorrect length!";
+
+			sequence = newSequence;
+		}
+		catch (std::string error)
+		{
+			std::cout << error << std::endl;
 		}
 
-		return true;
+	}
+	int checkCorrect(code correctCode)
+	{
+		// Find the number of corect values
+		int correct = 0;
+		for (int index = 0; index < (int)sequence.size(); index++)
+		{
+			if (sequence[index] == correctCode.sequence[index])
+				correct++;
+		}
+
+		return correct;
 	}
 
 	/* checkIncorrect
@@ -152,23 +184,21 @@ public:
 	*
 	* @param correctCode std::vector<int>
 	*/
-	response checkIncorrect(code correctCode)
+	int checkIncorrect(code correctCode)
 	{
-		int correct = 0, incorrect = 0;
+		int incorrect = 0;
 
-		std::vector<codeElement> sequenceCopy(sequence);
+		// Create a copy of the correct sequence so we can modify it
+		std::vector<int> sequenceGuess(sequence);
 
-		// Look for correct values
+		// Rmove correct values from both correct and guess sequences
 		int index = 0;
-		while (index < (int)sequenceCopy.size())
+		while (index < (int)sequenceGuess.size())
 		{
-			if (sequenceCopy[index].value == correctCode.sequence[index].value)
+			if (sequenceGuess[index] == correctCode.sequence[index])
 			{
-				// Found a correct value
-				correct++;
-
-				// Remove matching (correct) values from code and sequence
-				sequenceCopy.erase(sequenceCopy.begin() + index);
+				// Found a correct value, remove matching (correct) values
+				sequenceGuess.erase(sequenceGuess.begin() + index);
 				correctCode.sequence.erase(correctCode.sequence.begin() + index);
 			}
 
@@ -178,24 +208,22 @@ public:
 		}
 
 		// Look for incorrect (wrong place) values in the remainder of the sequency
-		for (int index = 0; index < (int)sequenceCopy.size(); index++)
+		for (int index = 0; index < (int)sequenceGuess.size(); index++)
 		{
 			// Look for each sequence element in the correct code
-			int position = findInSequence(&correctCode.sequence, sequenceCopy[index].value);
+			auto iterator = std::find(correctCode.sequence.begin(), correctCode.sequence.end(), sequenceGuess[index]);
+			if (iterator != correctCode.sequence.end())
+			{
+				// Value was found (indicating a wrong place value)
+				incorrect++;
 
-			// Value was not found in the correct code
-			if (position == -1)
-				continue;
-
-			// Value was found (indicating a wrong place value)
-			incorrect++;
-
-			// Remove the element from the sequence so it is not found again
-			correctCode.sequence.erase(correctCode.sequence.begin() + position);
+				// Remove the element from the sequence so it is not found again
+				correctCode.sequence.erase(iterator);
+			}
 		}
 
-		// Return a response object
-		return response(correct, incorrect);
+		// Return number of incorrect values
+		return incorrect;
 	}
 
 	/* initialize
@@ -208,10 +236,7 @@ public:
 		srand((int)time(NULL));
 		for (int index = 0; index < MASTERMIND_CODE_SIZE; index++)
 		{
-			codeElement element;
-			element.value = rand() % (MAX_CODE_VALUE + 1);
-			element.index = index;
-			sequence.push_back(element);
+			sequence.push_back(rand() % (MAX_CODE_VALUE + 1));
 		}
 	}
 
@@ -224,7 +249,7 @@ public:
 		std::cout << "Code - {";
 		for (int index = 0; index < (int)sequence.size(); index++)
 		{
-			std::cout << sequence[index].value;
+			std::cout << sequence[index];
 			if (index < (int)sequence.size() - 1)
 				std::cout << ", ";
 		}
@@ -253,62 +278,39 @@ public:
 	*/
 	void humanGuess()
 	{	
-		guessSequence.sequence.clear();
-		int userGuess[4];
+		std::vector<int> userGuess(MASTERMIND_CODE_SIZE);
 
-		for (int index = 0; index < 4; index++)
+		for (int index = 0; index < MASTERMIND_CODE_SIZE; index++)
 		{
-			//ask user to enter the guess number;
-			if (index == 0) 
+			int input = 0;
+			do
 			{
-				std::cout << "Please enter your 1st digit number from 0 to 5: ";
-			}
-			else if (index == 1) 
-			{
-				std::cout << "Please enter your 2nd digit number from 0 to 5: ";
-			}
-			else if (index == 2) 
-			{
-				std::cout << "Please enter your 3rd digit number from 0 to 5: ";
-			}
-			else
-			{
-				std::cout << "Please enter your 4th digit number from 0 to 5: ";
-			}
-			std::cin >> userGuess[index];
+				// Display error for bad input
+				if (std::cin.fail() || input < 0 || input > MAX_CODE_VALUE)
+				{
+					std::cout << "ERROR, invalid input" << std::endl;
 
-			//If the input number is invlaid it will ask the user to reetner the number again
-			while (std::cin.fail())
-			{
-				std::cin.clear();
-				std::cin.ignore();
-				std::cout << "You have enter an invalid number. Please reenter you number: ";
-				std::cin >> userGuess[index];
-			}
-			
-			//If the input number is less than 0 or greater than 5, it will ask user to reenter the number again
-			if ((userGuess[index] > 5) || (userGuess[index] < 0)) 
-			{
-				std::cout << "Your number should only be from 0 to 5. Please reenter yout number: ";
-				std::cin >> userGuess[index];
-			}
-			codeElement element;
-			element.value = userGuess[index];
-			element.index = index;
-			guessSequence.sequence.push_back(element);
+					// Clear cin buffer
+					std::cin.clear();
+					std::cin.ignore(std::cin.rdbuf()->in_avail(), '\n');
+				}
+
+				// Ask user to enter the guess number;
+				std::cout << "Please enter code digit " << index + 1 << " in the range of 0 to " << MAX_CODE_VALUE << ": ";
+				std::cin >> input;
+
+			} while (std::cin.fail() || input < 0 || input > MAX_CODE_VALUE);
+
+			userGuess[index] = input;
 		}
 
-		//print out the guess code user enter
-		std::cout << "Your Code - {";
-		for (int index = 0; index < (int)guessSequence.sequence.size(); index++)
-		{
-			std::cout << guessSequence.sequence[index].value;
-			if (index < (int)guessSequence.sequence.size() - 1)
-				std::cout << ", ";
-		}
-		std::cout << "}" << std::endl;
+		// Initialize the guessSequence to be the users guess
+		guessSequence = code(userGuess);
 
+		// Print out the guess code user entered
+		guessSequence.print();
 	}
+
 	/*
 	*
 	* @params secretcode std::vector<int>, guessCode std::vector<int>
@@ -316,8 +318,11 @@ public:
 	void getResponse(code secretCode, code guessCode)
 	{
 		int correct=secretCode.checkCorrect(guessCode);
-		response responses = secretCode.checkIncorrect(guessCode);
-		isSolved(responses);
+		int incorrect = secretCode.checkIncorrect(guessCode);
+
+		// Create a response object with the values correct/incorrect values
+		response response(correct, incorrect);
+		isSolved(response);
 	}
 
 	/*
@@ -328,7 +333,7 @@ public:
 	*/
 	void isSolved(response checkRepsonse)
 	{
-		if (checkRepsonse.compare(checkRepsonse))
+		if (checkRepsonse.getCorrect() == MASTERMIND_CODE_SIZE)
 		{
 			gameEnd = true;
 			std::cout << std::endl << "The board has been solved. You, the codebreaker have won the game!" << std::endl;
@@ -347,7 +352,6 @@ public:
 	{
 		int index = 0;
 		code secretCode;
-		secretCode.initialize();
 		std::cout << "A secret code had been generated" << std::endl;
 
 		// ten tries for the user
@@ -357,10 +361,10 @@ public:
 			humanGuess();
 			getResponse(secretCode, guessSequence);
 			if (gameEnd) {
-				index = 11;
+				break;
 			}
 			std::cout << std::endl;
-		} while (index < 10);
+		} while (index < MAX_GUESSES);
 
 		// If secrete code is not guess correct in 10 tries, this message will appeare.
 		if (!gameEnd) 
