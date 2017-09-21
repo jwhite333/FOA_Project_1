@@ -259,10 +259,6 @@ public:
 
 class mastermind
 {
-private:
-	code guessSequence;
-	bool gameEnd = false;
-
 public:
 
 	/*
@@ -274,9 +270,10 @@ public:
 	}
 
 	/*
-	* Read the a guess from the keyboard and stored in a code object
+	*
+	* Read the a guess from the keyboard and return a code object
 	*/
-	void humanGuess()
+	code humanGuess()
 	{	
 		std::vector<int> userGuess(MASTERMIND_CODE_SIZE);
 
@@ -301,73 +298,93 @@ public:
 
 			} while (std::cin.fail() || input < 0 || input > MAX_CODE_VALUE);
 
+			
 			userGuess[index] = input;
 		}
 
 		// Initialize the guessSequence to be the users guess
-		guessSequence = code(userGuess);
-
-		// Print out the guess code user entered
-		guessSequence.print();
+		code guessSequence(userGuess);
+		return guessSequence;
 	}
 
 	/*
-	*
+	* 
+	* generate a response by passing correct/incorrect value and return the response
+	* 
 	* @params secretcode std::vector<int>, guessCode std::vector<int>
 	*/
-	void getResponse(code secretCode, code guessCode)
+	response getResponse(code secretCode, code guessCode)
 	{
 		int correct=secretCode.checkCorrect(guessCode);
 		int incorrect = secretCode.checkIncorrect(guessCode);
 
 		// Create a response object with the values correct/incorrect values
 		response response(correct, incorrect);
-		isSolved(response);
+		return response;
 	}
 
 	/*
-	* Return a response base on boolean of response 
+	*
+	* Return a boolean base on response 
 	* True - codebreaker won the game
 	* False - game continue and print the result
+	*
 	* @params response checkRepsonse 
 	*/
-	void isSolved(response checkRepsonse)
+	bool isSolved(response checkRepsonse)
 	{
+		//check is the number digit correct equal to the size of secret code
 		if (checkRepsonse.getCorrect() == MASTERMIND_CODE_SIZE)
 		{
-			gameEnd = true;
-			std::cout << std::endl << "The board has been solved. You, the codebreaker have won the game!" << std::endl;
+			return true;
 		}
 		else
 		{
-			checkRepsonse.print();
+			return false;
 		}
 		
 	}
 
 	/*
+	*
 	* start the game, and inititalize the secert code, and user only have 10 tries to win the game
 	*/
 	void playGame()
 	{
 		int index = 0;
+
+		//inititalize secret code
 		code secretCode;
-		std::cout << "A secret code had been generated" << std::endl;
+		secretCode.print();
+		std::cout << "A secret code had been generated" << std::endl << std::endl;
 
 		// ten tries for the user
 		do {
 			index++;
-			std::cout << "Guess Number " << index << std::endl;
-			humanGuess();
-			getResponse(secretCode, guessSequence);
-			if (gameEnd) {
+			std::cout << "Guess Try #" << index << std::endl;
+			code guessSequence = humanGuess();
+
+			std::cout << "You guess is";
+			guessSequence.print();
+
+			//get the response
+			response responses = getResponse(secretCode, guessSequence);
+			isSolved(responses);
+
+			//check is the secretcode is solved or not
+			if (isSolved(responses)) {
+				std::cout << std::endl << "The board has been solved. You, the codebreaker have won the game!" << std::endl;
 				break;
 			}
+			else {
+				responses.print();
+			}
+			
 			std::cout << std::endl;
 		} while (index < MAX_GUESSES);
 
-		// If secrete code is not guess correct in 10 tries, this message will appeare.
-		if (!gameEnd) 
+		// If secrete code is not guess correct in 10 tries, this message will appeare and game end.
+		if (index > MAX_GUESSES) 
 		{
 			std::cout << "Secret ";
 			printSecretCode(secretCode);

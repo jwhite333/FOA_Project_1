@@ -1,0 +1,6 @@
+Name: Jun Jie Chen, Jon White
+Project 1
+
+Jun Jie:
+	Jon worked on the code and response class of the mastermind header file. This set up the code object for me 
+	when I started work on the mastermind class and the cpp file.
