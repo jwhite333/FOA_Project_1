@@ -295,44 +295,37 @@ public:
 	* Read the a guess from the keyboard and return a code object
 	*/
 	code humanGuess()
-	{	
+	{
 		std::vector<int> userGuess(MASTERMIND_CODE_SIZE);
-		try
+
+		for (int index = 0; index < MASTERMIND_CODE_SIZE; index++)
 		{
-			for (int index = 0; index < MASTERMIND_CODE_SIZE; index++)
+			int input = 0;
+			do
 			{
-				int input = 0;
-				do
+				// Display error for bad input
+				if (std::cin.fail() || input < 0 || input > MAX_CODE_VALUE)
 				{
-					// Display error for bad input
-					if (std::cin.fail() || input < 0 || input > MAX_CODE_VALUE)
-					{
-						std::cout << "ERROR, invalid input" << std::endl;
+					std::cout << "ERROR, invalid input" << std::endl;
 
-						// Clear cin buffer
-						std::cin.clear();
-						std::cin.ignore(std::cin.rdbuf()->in_avail(), '\n');
-					}
+					// Clear cin buffer
+					std::cin.clear();
+					std::cin.ignore(std::cin.rdbuf()->in_avail(), '\n');
+				}
 
-					// Ask user to enter the guess number;
-					std::cout << "Please enter code digit " << index + 1 << " in the range of 0 to " << MAX_CODE_VALUE << ": ";
-					std::cin >> input;
+				// Ask user to enter the guess number;
+				std::cout << "Please enter code digit " << index + 1 << " in the range of 0 to " << MAX_CODE_VALUE << ": ";
+				std::cin >> input;
 
-				} while (std::cin.fail() || input < 0 || input > MAX_CODE_VALUE);
+			} while (std::cin.fail() || input < 0 || input > MAX_CODE_VALUE);
 
-				userGuess[index] = input;
-			}
-
-			// Initialize the guessSequence to be the users guess
-			code guessSequence(userGuess);
-			return guessSequence;
+			userGuess[index] = input;
 		}
 
-		catch (std::exception errorMsg)
-		{
-			std::cout << errorMsg.what() << std::endl;
-		}
-		
+		// Initialize the guessSequence to be the users guess
+		code guessSequence(userGuess);
+		return guessSequence;
+
 	}
 
 	/*
