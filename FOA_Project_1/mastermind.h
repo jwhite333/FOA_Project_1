@@ -159,9 +159,9 @@ public:
 
 			sequence = newSequence;
 		}
-		catch (std::string error)
+		catch (std::exception error)
 		{
-			std::cout << error << std::endl;
+			std::cout << error.what() << std::endl;
 		}
 
 	}
@@ -179,9 +179,9 @@ public:
 
 			return correct;
 		}
-		catch (std::string errorMsg)
+		catch (std::exception errorMsg)
 		{
-			std::cout << errorMsg << std::endl;
+			std::cout << errorMsg.what() << std::endl;
 		}
 	}
 
@@ -248,9 +248,9 @@ public:
 				sequence.push_back(rand() % (MAX_CODE_VALUE + 1));
 			}
 		}
-		catch (std::string errorMsg)
+		catch (std::exception errorMsg)
 		{
-			std::cout << errorMsg << std::endl;
+			std::cout << errorMsg.what() << std::endl;
 		}
 	}
 
@@ -271,9 +271,9 @@ public:
 			}
 			std::cout << "}" << std::endl;
 		}
-		catch (std::string error)
+		catch (std::exception errorMsg)
 		{
-			std::cout << error << std::endl;
+			std::cout << errorMsg.what() << std::endl;
 		}
 	}
 };
@@ -328,9 +328,9 @@ public:
 			return guessSequence;
 		}
 
-		catch (std::string error)
+		catch (std::exception errorMsg)
 		{
-			std::cout << error << std::endl;
+			std::cout << errorMsg.what() << std::endl;
 		}
 		
 	}
@@ -352,9 +352,9 @@ public:
 			response response(correct, incorrect);
 			return response;
 		}
-		catch (std::string errorMsg)
+		catch (std::exception errorMsg)
 		{
-			std::cout << errorMsg << std::endl;
+			std::cout << errorMsg.what() << std::endl;
 		}
 	}
 
@@ -381,9 +381,9 @@ public:
 			}
 
 		}
-		catch (std::string errorMsg)
+		catch (std::exception errorMsg)
 		{
-			std::cout << errorMsg << std::endl;
+			std::cout << errorMsg.what() << std::endl;
 		}
 	}
 

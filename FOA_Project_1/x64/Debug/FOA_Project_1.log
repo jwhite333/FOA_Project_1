@@ -1,4 +1,7 @@
 ﻿  mastermind.cpp
-c:\users\jun jie chen\desktop\foa_project_1-master\foa_project_1\mastermind.h(316): warning C4715: 'mastermind::humanGuess': not all control paths return a value
+c:\users\jun jie chen\desktop\foa_project_1-master\foa_project_1\mastermind.h(336): warning C4715: 'mastermind::humanGuess': not all control paths return a value
+c:\users\jun jie chen\desktop\foa_project_1-master\foa_project_1\mastermind.h(359): warning C4715: 'mastermind::getResponse': not all control paths return a value
+c:\users\jun jie chen\desktop\foa_project_1-master\foa_project_1\mastermind.h(388): warning C4715: 'mastermind::isSolved': not all control paths return a value
+c:\users\jun jie chen\desktop\foa_project_1-master\foa_project_1\mastermind.h(186): warning C4715: 'code::checkCorrect': not all control paths return a value
   FOA_Project_1.vcxproj -> C:\Users\Jun Jie Chen\Desktop\FOA_Project_1-master\x64\Debug\FOA_Project_1.exe
   FOA_Project_1.vcxproj -> C:\Users\Jun Jie Chen\Desktop\FOA_Project_1-master\x64\Debug\FOA_Project_1.pdb (Partial PDB)
