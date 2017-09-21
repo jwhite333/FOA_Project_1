@@ -9,36 +9,12 @@
 #define MAX_CODE_VALUE 5
 #define MAX_GUESSES 10
 
-
-/* codeElement
-*
-* Stores an element in such a way that that the original index can be found if vectors are resized during checkIncorrect()
-*/
-struct codeElement
+enum inputError
 {
-	int index;
-	int value;
+	NONE,
+	NOT_A_NUMBER,
+	OUT_OF_RANGE
 };
-
-/* findInSequence
-*
-* Finds the first instance of value in the given sequence
-*
-* @param sequence std::vector<codeElement> *
-* @param value int
-*/
-int findInSequence(std::vector<codeElement> * sequence, int value)
-{
-	for (auto iterator = sequence->begin(); iterator < sequence->end(); iterator++)
-	{
-		if (iterator->value == value)
-		{
-			return (int)(iterator - sequence->begin());
-		}
-	}
-
-	return -1;
-}
 
 class response
 {
@@ -127,13 +103,6 @@ private:
 	std::vector<int> sequence;
 	
 public:
-	/* checkCorrect
-	*
-	* Compares the code sequence to the correct code and returs the number of numbers in the correct location
-	*
-	* @param correctCode std::vector<int>
-	*/
-
 	/* code
 	*
 	* Constructor to initialize a random code
@@ -165,24 +134,24 @@ public:
 		}
 
 	}
+
+	/* checkCorrect
+	*
+	* Compares the code sequence to the correct code and returs the number of numbers in the correct location
+	*
+	* @param correctCode std::vector<int>
+	*/
 	int checkCorrect(code correctCode)
 	{
-		try 
+		// Find the number of corect values
+		int correct = 0;
+		for (int index = 0; index < (int)sequence.size(); index++)
 		{
-			// Find the number of corect values
-			int correct = 0;
-			for (int index = 0; index < (int)sequence.size(); index++)
-			{
-				if (sequence[index] == correctCode.sequence[index])
-					correct++;
-			}
+			if (sequence[index] == correctCode.sequence[index])
+				correct++;
+		}
 
-			return correct;
-		}
-		catch (std::exception errorMsg)
-		{
-			std::cout << errorMsg.what() << std::endl;
-		}
+		return correct;
 	}
 
 	/* checkIncorrect
@@ -239,18 +208,11 @@ public:
 	*/
 	void initialize()
 	{
-		try
+		// Set value to be random integers from 0 - MAX_CODE_VALUE
+		srand((int)time(NULL));
+		for (int index = 0; index < MASTERMIND_CODE_SIZE; index++)
 		{
-			// Set value to be random integers from 0 - MAX_CODE_VALUE
-			srand((int)time(NULL));
-			for (int index = 0; index < MASTERMIND_CODE_SIZE; index++)
-			{
-				sequence.push_back(rand() % (MAX_CODE_VALUE + 1));
-			}
-		}
-		catch (std::exception errorMsg)
-		{
-			std::cout << errorMsg.what() << std::endl;
+			sequence.push_back(rand() % (MAX_CODE_VALUE + 1));
 		}
 	}
 
@@ -260,21 +222,14 @@ public:
 	*/
 	void print()
 	{
-		try 
+		std::cout << "Code - {";
+		for (int index = 0; index < (int)sequence.size(); index++)
 		{
-			std::cout << "Code - {";
-			for (int index = 0; index < (int)sequence.size(); index++)
-			{
-				std::cout << sequence[index];
-				if (index < (int)sequence.size() - 1)
-					std::cout << ", ";
-			}
-			std::cout << "}" << std::endl;
+			std::cout << sequence[index];
+			if (index < (int)sequence.size() - 1)
+				std::cout << ", ";
 		}
-		catch (std::exception errorMsg)
-		{
-			std::cout << errorMsg.what() << std::endl;
-		}
+		std::cout << "}" << std::endl;
 	}
 };
 
@@ -301,23 +256,42 @@ public:
 		for (int index = 0; index < MASTERMIND_CODE_SIZE; index++)
 		{
 			int input = 0;
+			inputError error = NONE;
 			do
 			{
-				// Display error for bad input
-				if (std::cin.fail() || input < 0 || input > MAX_CODE_VALUE)
+				try
 				{
-					std::cout << "ERROR, invalid input" << std::endl;
+					// Ask user to enter the guess number;
+					std::cout << "Please enter code digit " << index + 1 << " in the range of 0 to " << MAX_CODE_VALUE << ": ";
+					std::cin >> input;
+
+					// Catch bad input
+					if (std::cin.fail())
+						throw inputError::NOT_A_NUMBER;
+
+					// Catch out of range input
+					if (input < 0 || input > MAX_CODE_VALUE)
+						throw inputError::OUT_OF_RANGE;
+
+					error = inputError::NONE;
+				}
+				catch (inputError e)
+				{
+					// Set error flag
+					error = e;
+
+					// Display error for bad input
+					if (e == inputError::NOT_A_NUMBER)
+						std::cout << "ERROR, input not a number" << std::endl;
+					if (e == inputError::OUT_OF_RANGE)
+						std::cout << "ERROR, input is out of acceptable range" << std::endl;
 
 					// Clear cin buffer
 					std::cin.clear();
 					std::cin.ignore(std::cin.rdbuf()->in_avail(), '\n');
 				}
-
-				// Ask user to enter the guess number;
-				std::cout << "Please enter code digit " << index + 1 << " in the range of 0 to " << MAX_CODE_VALUE << ": ";
-				std::cin >> input;
-
-			} while (std::cin.fail() || input < 0 || input > MAX_CODE_VALUE);
+				
+			} while (error != inputError::NONE);
 
 			userGuess[index] = input;
 		}
@@ -336,19 +310,12 @@ public:
 	*/
 	response getResponse(code secretCode, code guessCode)
 	{
-		try
-		{
-			int correct = secretCode.checkCorrect(guessCode);
-			int incorrect = secretCode.checkIncorrect(guessCode);
+		int correct = secretCode.checkCorrect(guessCode);
+		int incorrect = secretCode.checkIncorrect(guessCode);
 
-			// Create a response object with the values correct/incorrect values
-			response response(correct, incorrect);
-			return response;
-		}
-		catch (std::exception errorMsg)
-		{
-			std::cout << errorMsg.what() << std::endl;
-		}
+		// Create a response object with the values correct/incorrect values
+		response response(correct, incorrect);
+		return response;
 	}
 
 	/*
@@ -361,22 +328,14 @@ public:
 	*/
 	bool isSolved(response checkRepsonse)
 	{
-		//check is the number digit correct equal to the size of secret code
-		try 
+		// Check is the number digit correct equal to the size of secret code
+		if (checkRepsonse.getCorrect() == MASTERMIND_CODE_SIZE)
 		{
-			if (checkRepsonse.getCorrect() == MASTERMIND_CODE_SIZE)
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-
+			return true;
 		}
-		catch (std::exception errorMsg)
+		else
 		{
-			std::cout << errorMsg.what() << std::endl;
+			return false;
 		}
 	}
 
@@ -387,19 +346,20 @@ public:
 	void playGame()
 	{
 		int index = 0;
+		bool success = false;
 
 		//inititalize secret code
 		code secretCode;
-		secretCode.print();
-		std::cout << "A secret code had been generated" << std::endl << std::endl;
+		std::cout << "A secret code had been generated, try to guess it!" << std::endl << std::endl;
 
 		// ten tries for the user
 		do {
 			index++;
-			std::cout << "Guess Try #" << index << std::endl;
-			code guessSequence = humanGuess();
+			std::cout << "Guess #" << index << std::endl;
 
-			std::cout << "You guess is";
+			code guessSequence = humanGuess();
+		
+			std::cout << "Your guess is: ";
 			guessSequence.print();
 
 			//get the response
@@ -409,6 +369,7 @@ public:
 			//check is the secretcode is solved or not
 			if (isSolved(responses)) {
 				std::cout << std::endl << "The board has been solved. You, the codebreaker have won the game!" << std::endl;
+				success = true;
 				break;
 			}
 			else {
@@ -419,11 +380,11 @@ public:
 		} while (index < MAX_GUESSES);
 
 		// If secrete code is not guess correct in 10 tries, this message will appeare and game end.
-		if (index > MAX_GUESSES) 
+		if (!success) 
 		{
-			std::cout << "Secret ";
+			std::cout << "You were unable to guess the code in " << MAX_GUESSES << " tries!" << std::endl
+				<< "The correct Secret Code was: ";
 			printSecretCode(secretCode);
-			std::cout << std::endl << "You just lost game. CodeMaker win!!" << std::endl << std::endl;
 		}
 	}
 };
