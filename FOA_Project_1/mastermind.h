@@ -167,15 +167,22 @@ public:
 	}
 	int checkCorrect(code correctCode)
 	{
-		// Find the number of corect values
-		int correct = 0;
-		for (int index = 0; index < (int)sequence.size(); index++)
+		try 
 		{
-			if (sequence[index] == correctCode.sequence[index])
-				correct++;
-		}
+			// Find the number of corect values
+			int correct = 0;
+			for (int index = 0; index < (int)sequence.size(); index++)
+			{
+				if (sequence[index] == correctCode.sequence[index])
+					correct++;
+			}
 
-		return correct;
+			return correct;
+		}
+		catch (std::string errorMsg)
+		{
+			std::cout << errorMsg << std::endl;
+		}
 	}
 
 	/* checkIncorrect
@@ -232,11 +239,18 @@ public:
 	*/
 	void initialize()
 	{
-		// Set value to be random integers from 0 - MAX_CODE_VALUE
-		srand((int)time(NULL));
-		for (int index = 0; index < MASTERMIND_CODE_SIZE; index++)
+		try
 		{
-			sequence.push_back(rand() % (MAX_CODE_VALUE + 1));
+			// Set value to be random integers from 0 - MAX_CODE_VALUE
+			srand((int)time(NULL));
+			for (int index = 0; index < MASTERMIND_CODE_SIZE; index++)
+			{
+				sequence.push_back(rand() % (MAX_CODE_VALUE + 1));
+			}
+		}
+		catch (std::string errorMsg)
+		{
+			std::cout << errorMsg << std::endl;
 		}
 	}
 
@@ -246,14 +260,21 @@ public:
 	*/
 	void print()
 	{
-		std::cout << "Code - {";
-		for (int index = 0; index < (int)sequence.size(); index++)
+		try 
 		{
-			std::cout << sequence[index];
-			if (index < (int)sequence.size() - 1)
-				std::cout << ", ";
+			std::cout << "Code - {";
+			for (int index = 0; index < (int)sequence.size(); index++)
+			{
+				std::cout << sequence[index];
+				if (index < (int)sequence.size() - 1)
+					std::cout << ", ";
+			}
+			std::cout << "}" << std::endl;
 		}
-		std::cout << "}" << std::endl;
+		catch (std::string error)
+		{
+			std::cout << error << std::endl;
+		}
 	}
 };
 
@@ -276,35 +297,42 @@ public:
 	code humanGuess()
 	{	
 		std::vector<int> userGuess(MASTERMIND_CODE_SIZE);
-
-		for (int index = 0; index < MASTERMIND_CODE_SIZE; index++)
+		try
 		{
-			int input = 0;
-			do
+			for (int index = 0; index < MASTERMIND_CODE_SIZE; index++)
 			{
-				// Display error for bad input
-				if (std::cin.fail() || input < 0 || input > MAX_CODE_VALUE)
+				int input = 0;
+				do
 				{
-					std::cout << "ERROR, invalid input" << std::endl;
+					// Display error for bad input
+					if (std::cin.fail() || input < 0 || input > MAX_CODE_VALUE)
+					{
+						std::cout << "ERROR, invalid input" << std::endl;
 
-					// Clear cin buffer
-					std::cin.clear();
-					std::cin.ignore(std::cin.rdbuf()->in_avail(), '\n');
-				}
+						// Clear cin buffer
+						std::cin.clear();
+						std::cin.ignore(std::cin.rdbuf()->in_avail(), '\n');
+					}
 
-				// Ask user to enter the guess number;
-				std::cout << "Please enter code digit " << index + 1 << " in the range of 0 to " << MAX_CODE_VALUE << ": ";
-				std::cin >> input;
+					// Ask user to enter the guess number;
+					std::cout << "Please enter code digit " << index + 1 << " in the range of 0 to " << MAX_CODE_VALUE << ": ";
+					std::cin >> input;
 
-			} while (std::cin.fail() || input < 0 || input > MAX_CODE_VALUE);
+				} while (std::cin.fail() || input < 0 || input > MAX_CODE_VALUE);
 
-			
-			userGuess[index] = input;
+				userGuess[index] = input;
+			}
+
+			// Initialize the guessSequence to be the users guess
+			code guessSequence(userGuess);
+			return guessSequence;
 		}
 
-		// Initialize the guessSequence to be the users guess
-		code guessSequence(userGuess);
-		return guessSequence;
+		catch (std::string error)
+		{
+			std::cout << error << std::endl;
+		}
+		
 	}
 
 	/*
@@ -315,12 +343,19 @@ public:
 	*/
 	response getResponse(code secretCode, code guessCode)
 	{
-		int correct=secretCode.checkCorrect(guessCode);
-		int incorrect = secretCode.checkIncorrect(guessCode);
+		try
+		{
+			int correct = secretCode.checkCorrect(guessCode);
+			int incorrect = secretCode.checkIncorrect(guessCode);
 
-		// Create a response object with the values correct/incorrect values
-		response response(correct, incorrect);
-		return response;
+			// Create a response object with the values correct/incorrect values
+			response response(correct, incorrect);
+			return response;
+		}
+		catch (std::string errorMsg)
+		{
+			std::cout << errorMsg << std::endl;
+		}
 	}
 
 	/*
@@ -334,15 +369,22 @@ public:
 	bool isSolved(response checkRepsonse)
 	{
 		//check is the number digit correct equal to the size of secret code
-		if (checkRepsonse.getCorrect() == MASTERMIND_CODE_SIZE)
+		try 
 		{
-			return true;
+			if (checkRepsonse.getCorrect() == MASTERMIND_CODE_SIZE)
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+
 		}
-		else
+		catch (std::string errorMsg)
 		{
-			return false;
+			std::cout << errorMsg << std::endl;
 		}
-		
 	}
 
 	/*

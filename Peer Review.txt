@@ -1,9 +1,12 @@
 Name: Jun Jie Chen, Jon White
 Project 1
+Platform: Microsoft Visual Studio
+
 
 Jun Jie:
 	Jon worked on the code and response class of the mastermind header file. This set up the code object for me 
 	when I started work on the mastermind class and the cpp file.
 	
 Jonathan White:
-	Jun worked on the mastermind class and the main/playGame() loop. This included all the relevant UI, and the logic behind user     submissions and game behavior
+	Jun worked on the mastermind class and the main/playGame() loop. This included all the relevant UI, and the logic behind user     
+	submissions and game behavior
